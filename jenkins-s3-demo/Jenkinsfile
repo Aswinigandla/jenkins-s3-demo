@@ -14,16 +14,16 @@ pipeline {
             }
         }
 
-        stage('Validate') {
-            steps {
-                script {
-                    if (!fileExists('site/index.html')) {
-                        error 'site/index.html was not found!'
-                    }
-                }
-                echo 'Application files validated'
+       stage('Validate') {
+    steps {
+        script {
+            if (!fileExists('jenkins-s3-demo/site/index.html')) {
+                error 'jenkins-s3-demo/site/index.html was not found!'
             }
         }
+        echo 'Application files validated'
+    }
+}
 
         stage('Deploy to S3') {
             steps {
