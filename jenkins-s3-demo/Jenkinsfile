@@ -1,0 +1,60 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_DEFAULT_REGION = 'ap-south-1'
+        S3_BUCKET = 'YOUR-BUCKET-NAME'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Getting application from GitHub'
+                checkout scm
+            }
+        }
+
+        stage('Validate') {
+            steps {
+                script {
+                    if (!fileExists('site/index.html')) {
+                        error 'site/index.html was not found!'
+                    }
+                }
+                echo 'Application files validated'
+            }
+        }
+
+        stage('Deploy to S3') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-s3-creds'
+                ]]) {
+                    script {
+                        if (isUnix()) {
+                            sh '''
+                                aws sts get-caller-identity
+                                aws s3 sync site "s3://${S3_BUCKET}/"
+                            '''
+                        } else {
+                            bat '''
+                                aws sts get-caller-identity
+                                aws s3 sync site s3://%S3_BUCKET%/
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'SUCCESS: Application deployed to S3!'
+        }
+        failure {
+            echo 'FAILED: Check the Jenkins console output.'
+        }
+    }
+}
