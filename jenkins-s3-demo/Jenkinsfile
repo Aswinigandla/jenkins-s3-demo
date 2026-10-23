@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'ap-south-1'
-        S3_BUCKET = 'YOUR-BUCKET-NAME'
+        S3_BUCKET = 'aswini-jenkins-s3-demo-2026'
     }
 
     stages {
@@ -35,12 +35,12 @@ pipeline {
                         if (isUnix()) {
                             sh '''
                                 aws sts get-caller-identity
-                                aws s3 sync site "s3://${S3_BUCKET}/"
+                                aws s3 sync jenkins-s3-demo/site s3://%S3_BUCKET%/
                             '''
                         } else {
                             bat '''
                                 aws sts get-caller-identity
-                                aws s3 sync site s3://%S3_BUCKET%/
+                                aws s3 sync jenkins-s3-demo/site s3://%S3_BUCKET%/
                             '''
                         }
                     }
